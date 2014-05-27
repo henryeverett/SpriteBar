@@ -1,4 +1,4 @@
-SpriteBar - Draw your own progress bar.
+SpriteBar - Draw your own progress bar in Sprite Kit.
 =========
 
 This library is a convenient way to create your own SKSpriteNode progress bars in Apple's Sprite Kit. Simply pass in a Texture Atlas containing your sprites and SpriteBar will do the rest.
@@ -39,8 +39,8 @@ progressBar.size = CGSizeMake(50, 50);
 ```
 
 ## Credits & Contact
-SpriteBar was created by [Henry Everett](http://www.henryeverett.info/)
-Twitter: [@henryeverett](https://www.twitter.com/henryeverett)
-GitHub: [henryeverett](https://github.com/henryeverett)
+SpriteBar was created by [Henry Everett](http://www.henryeverett.info/)  
+Twitter: [@henryeverett](https://www.twitter.com/henryeverett)  
+GitHub: [henryeverett](https://github.com/henryeverett)  
 
 **Please fork and contribute to this project!**
