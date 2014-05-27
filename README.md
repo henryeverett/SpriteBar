@@ -7,6 +7,7 @@ This library is a convenient way to create your own SKSpriteNode progress bars i
 
 - Progress bar generation from SKTextureAtlas.
 - Automatically scales the animation, allowing you to provide as many frames as you want. From 2 to 100!
+- Finds the closest texture file to the percent provided.
 - Built in timer function starts animating the progress bar with your graphics.
 
 ## Installation
@@ -21,7 +22,6 @@ progress_20.png
 progress_30.png
 etc
 ```
-You must have at least a 0 file and a 100 file.
 
 ## Usage
 

@@ -11,6 +11,7 @@
 @interface SpriteBar ()
 
 @property (nonatomic, strong) SKTextureAtlas *atlas;
+@property (nonatomic, strong) NSMutableArray *availableTextureAddresses;
 
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, assign) NSTimeInterval timerInterval;
@@ -22,6 +23,10 @@
 - (void)timerTick:(NSTimer *)timer;
 /* Calculate the number of frames in the texture atlas. */
 - (NSInteger)numberOfFramesInAnimation:(NSString *)animationName;
+/* Find the nearest texture number to a given percent. */
+- (NSInteger)closestAvailableToPercent:(NSInteger)percent;
+/* Extract the percent identifier from a texture name. */
+- (NSNumber *)percentFromTextureName:(NSString *)string;
 
 @end
 
@@ -49,9 +54,17 @@
 
 - (void)resetProgress {
     
+    self.availableTextureAddresses = [[NSMutableArray alloc] init];
+    
+    for (NSString *name in self.atlas.textureNames) {
+        [self.availableTextureAddresses addObject:[self percentFromTextureName:name]];
+    }
+
     [self invalidateTimer];
+    // Set defaults
     self.currentTime = 0;
-    self.texture = [self.atlas textureNamed:[NSString stringWithFormat:@"%@_0.png",self.textureReference]];
+    self.texture = [self.atlas textureNamed:[NSString stringWithFormat:@"%@_%lu.png",self.textureReference,[self closestAvailableToPercent:0]]];
+    
 }
 
 - (void)startBarProgressWithTimer:(NSTimeInterval)seconds target:(id)target selector:(SEL)selector {
@@ -92,8 +105,10 @@
 - (void)setProgress:(CGFloat)progress {
     
     // Set texure
-    CGFloat percent = progress * 100;
-    self.texture = [self.atlas textureNamed:[NSString stringWithFormat:@"%@_%lu.png",self.textureReference,lrint(percent)]];
+    CGFloat percent = lrint(progress * 100);
+    
+    self.texture = [self.atlas
+                    textureNamed:[NSString stringWithFormat:@"%@_%lu.png",self.textureReference,[self closestAvailableToPercent:percent]]];
     
     // If we have reached 100%, invalidate the timer and perform selector on passed in object.
     if (fabsf(progress) >= fabsf(1.0)) {
@@ -115,6 +130,44 @@
     NSArray *allAnimationNames = self.atlas.textureNames;
     NSPredicate *nameFilter = [NSPredicate predicateWithFormat:@"SELF CONTAINS[cd] %@",animationName];
     return [[allAnimationNames filteredArrayUsingPredicate:nameFilter] count];
+}
+
+- (NSInteger)closestAvailableToPercent:(NSInteger)percent {
+
+    NSInteger closest = 0;
+    
+    for (NSNumber *thisPerc in self.availableTextureAddresses) {
+        if (closest == 0 || labs(thisPerc.integerValue - percent) < labs(closest - percent)) {
+            closest = thisPerc.integerValue;
+        }
+    }
+
+    return closest;
+}
+
+- (NSNumber *)percentFromTextureName:(NSString *)string {
+    
+    // Get rid of "@2x"
+    NSString *clippedString = [string stringByReplacingOccurrencesOfString:@"@2x" withString:@""];
+    
+    // Match the rest of the pattern
+    NSString *pattern = [NSString stringWithFormat:@"(?<=%@_)([0-9]+)(?=.png)",self.textureReference];
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:nil];
+    
+    NSArray *matches = [regex matchesInString:clippedString options:0 range:NSMakeRange(0, clippedString.length)];
+    
+    // If the matches don't equal 1, you have done something wrong.
+    if (matches.count != 1) {
+        [NSException raise:@"SpriteBar: Incorrect texture naming."
+                    format:@"Textures should follow naming convention: %@_#.png. Failed texture name: %@",self.textureReference,string];
+    }
+    
+    for (NSTextCheckingResult *match in matches) {
+        NSRange matchRange = [match rangeAtIndex:1];
+        return [NSNumber numberWithInteger:[[clippedString substringWithRange:matchRange] integerValue]];
+    }
+    
+    return nil;
 }
 
 @end
