@@ -47,12 +47,13 @@
     if (self) {
         self.atlas = textureAtlas;
         self.textureReference = @"progress";
-        [self resetProgress];
     }
     return self;
 }
 
 - (void)resetProgress {
+    
+    self.texture = [self.atlas textureNamed:[NSString stringWithFormat:@"%@_%lu.png",self.textureReference,[self closestAvailableToPercent:0]]];
     
     self.availableTextureAddresses = [[NSMutableArray alloc] init];
     
@@ -63,7 +64,6 @@
     [self invalidateTimer];
     // Set defaults
     self.currentTime = 0;
-    self.texture = [self.atlas textureNamed:[NSString stringWithFormat:@"%@_%lu.png",self.textureReference,[self closestAvailableToPercent:0]]];
     
 }
 
