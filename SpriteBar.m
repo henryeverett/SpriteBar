@@ -137,7 +137,7 @@
     NSInteger closest = 0;
     
     for (NSNumber *thisPerc in self.availableTextureAddresses) {
-        if (closest == 0 || labs(thisPerc.integerValue - percent) < labs(closest - percent)) {
+        if (labs(thisPerc.integerValue - percent) < labs(closest - percent)) {
             closest = thisPerc.integerValue;
         }
     }
